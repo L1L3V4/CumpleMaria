@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Copas</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    button { margin: 1rem; padding: 1rem 2rem; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <div id="admin">
+  <h1>Control de Copas y Bebidas</h1>
+    <h1 id="adminCopas">Copas: </h1>
+    <h1 id="adminBebidas">Bebidas: </h1>
+    <h2>Quitar Copas</h2>
+    <button onclick="quitarCopas()">Quitar Copas</button>
+
+    <h2>Quitar Bebidas</h2>
+    <button onclick="quitarBebidas()">Quitar Bebidas</button>
+
+    <h2>Usuarios Registrados</h2>
+    <ul id="usuarios"></ul>
+
+    <div id="respuesta" style="margin-top: 2rem; font-weight: bold;"></div>
+ </div>
+
+ <div id="usuario">
+    <h1>Información del Usuario</h1>
+    <div id="infoUsuario">
+      <p><strong>Copas restantes:</strong> <span id="copas"></span></p>
+      <p><strong>Bebidas restantes:</strong> <span id="bebidas"></span></p>
+    </div>
+ </div>
+  
+
+  <script>
+    window.onload = function(){
+      let admin = localStorage.getItem('usuario');
+      if(admin){
+        document.getElementById("admin").style.display='block';
+        document.getElementById("usuario").style.display='none';
+        
+        fetch(`/api/index/${id}`).then(response => {
+            if (!response.ok) throw new Error('Usuario no encontrado');
+            return response.json();
+          }).then(data => {
+            document.getElementById('adminCopas').innerText = "Copas: " + data.copas;
+            document.getElementById('adminBebidas').innerText = "Bebidas: " + data.bebidas;
+          }).catch(err => {
+            console.error(err);
+            alert('Error al obtener los datos del usuario' + id);
+          });
+          window.reload;
+
+      }else{
+        document.getElementById("usuario").style.display='block';
+        document.getElementById("admin").style.display='none';
+        
+        fetch(`/api/index/${id}`).then(response => {
+            if (!response.ok) throw new Error('Usuario no encontrado');
+            return response.json();
+          }).then(data => {
+            document.getElementById('copas').innerText = data.copas;
+            document.getElementById('bebidas').innerText = data.bebidas;
+          }).catch(err => {
+            console.error(err);
+            alert('Error al obtener los datos del usuario' + id);
+          });
+          window.reload;
+        
+      }
+  }
+
+
+    const pathParts = window.location.pathname.split('/');
+    const id = pathParts[pathParts.length - 1];
+    
+    //SI ES ADMIN
+    async function quitarCopas() {
+      const cantidad = 1;
+      console.log("ID ->" + id);
+      try {
+          const res = await fetch('/quitar-copas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id, cantidad: cantidad }) // Usamos 'cantidad' como el valor del input
+          });
+
+          // Verificar la respuesta del servidor
+          if (!res.ok) {
+            const errorData = await res.json();
+            console.error('Error al quitar copas:', errorData.error);
+            alert('Error al quitar copas: ' + errorData.error);
+            return;
+          }
+
+          const data = await res.json();
+          console.log('Respuesta del servidor:', data);
+          //alert(data.mensaje); // Mostrar un mensaje de éxito
+        } catch (err) {
+          console.error('Error al realizar la solicitud:', err);
+          alert('Hubo un error al procesar la solicitud.');
+        }
+        window.location.reload();
+        
+    }
+
+    async function quitarBebidas() {
+      const cantidad = 1;
+      console.log("ID ->" + id);
+      try {
+          const res = await fetch('/quitar-bebidas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id, cantidad: cantidad }) // Usamos 'cantidad' como el valor del input
+          });
+
+          // Verificar la respuesta del servidor
+          if (!res.ok) {
+            const errorData = await res.json();
+            console.error('Error al quitar bebidas:', errorData.error);
+            alert('Error al quitar bebidas: ' + errorData.error);
+            return;
+          }
+
+          const data = await res.json();
+          console.log('Respuesta del servidor:', data);
+          //alert(data.mensaje); // Mostrar un mensaje de éxito
+        } catch (err) {
+          console.error('Error al realizar la solicitud:', err);
+          alert('Hubo un error al procesar la solicitud.');
+        }
+        window.location.reload();
+    }
+
+    async function listarUsuarios() {
+      const res = await fetch('/index');
+      const usuarios = await res.json();
+      console.log(usuarios);
+      const lista = document.getElementById('usuarios');
+      lista.innerHTML = '';
+      usuarios.forEach(usuario => {
+        const li = document.createElement('li');
+        li.textContent = `${usuario._id} - Copas: ${usuario.copas} - Bebidas: ${usuario.bebidas}`;
+        if((usuario._id != "Id98" && usuario._id != "Id99")){
+          lista.appendChild(li);
+        }
+        
+      });
+     
+    }
+    
+    listarUsuarios();
+
+    //SI ES CLIENTE
+    if(!admin){
+      if (id) {
+        
+      } else {
+        alert('ID no encontrado en la URL');
+      }
+    }
+    
+  </script>
+</body>
+</html>

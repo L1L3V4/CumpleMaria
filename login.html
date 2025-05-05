@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Información de Usuario</title>
+</head>
+<body>
+  <!-- Formulario de login -->
+  <div id="loginForm">
+    <h2>Iniciar sesión</h2>
+    <input type="password" id="password" placeholder="Contraseña" required>
+    <button onclick="iniciarSesion()">Iniciar sesión</button>
+</div>
+
+<!-- Mensaje de bienvenida y opciones -->
+<div id="bienvenida" style="display: none;">
+    <h2>Bienvenido <span id="usuarioNombre"></span></h2>
+    <button onclick="cerrarSesion()">Cerrar sesión</button>
+</div>
+
+<script>
+    window.onload = function(){
+        const usuarioGuardado = localStorage.getItem('usuario');
+        
+        if (usuarioGuardado) {
+            // Si existe un usuario guardado en localStorage, mostrar la sección de bienvenida
+            mostrarBienvenida();
+        } else {
+            // Si no, mostrar el formulario de login
+            mostrarFormularioLogin();
+        }
+    }
+
+    async function iniciarSesion() {
+      const password = document.getElementById('password').value;
+        console.log(password);
+      // Aquí deberías hacer una validación real de usuario y contraseña.
+      // Para este ejemplo, asumimos que cualquier usuario que ingrese algo de nombre de usuario
+      // es válido (por simplicidad).
+      if (password) {
+          await fetch('/iniciarSesion',{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({contraseña: password})
+            }).then(response => {
+            if (!response.ok) throw new Error('No se ha iniciado sesión correctamente');
+            return response.json();
+            })
+            .then(data => {
+                // Guardar el nombre de usuario en localStorage
+                localStorage.setItem('usuario', "valido");
+                // Mostrar bienvenida
+                mostrarBienvenida();
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error al iniciar sesión: ' + err.message);
+            });
+        } else {
+            alert("Por favor, ingrese usuario y contraseña.");
+        }
+    }
+          
+      
+    
+
+        // Función para mostrar el formulario de login
+    function mostrarFormularioLogin() {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('bienvenida').style.display = 'none';
+    }
+
+    // Función para mostrar la bienvenida
+    function mostrarBienvenida() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('bienvenida').style.display = 'block';
+    }
+
+    // Función para cerrar sesión
+    function cerrarSesion() {
+        // Eliminar el usuario de localStorage y mostrar nuevamente el formulario de login
+        localStorage.removeItem('usuario');
+        mostrarFormularioLogin();
+    }
+
+</script>
+</body>
+</html>
